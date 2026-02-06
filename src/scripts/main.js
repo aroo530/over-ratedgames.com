@@ -17,17 +17,28 @@ function getUsedImages() {
   return JSON.parse(localStorage.getItem(USED_IMAGES_KEY)) || [];
 }
 
+function updateRemainingBadge() {
+  const usedCount = getUsedImages().length;
+  const totalCount = AVAILABLE_IMAGES.length;
+  const remaining = totalCount - usedCount;
+  
+  const badge = document.getElementById("imagesRemaining");
+  if (badge) badge.textContent = `Remaining: ${remaining}`;
+}
+
 function markImageAsUsed(imageName) {
   const usedImages = getUsedImages();
   if (!usedImages.includes(imageName)) {
     usedImages.push(imageName);
     localStorage.setItem(USED_IMAGES_KEY, JSON.stringify(usedImages));
+    updateRemainingBadge();
   }
 }
 
 function clearMemory() {
     localStorage.removeItem(USED_IMAGES_KEY);
     alert("Memory Cleared! All photos are available again.");
+    updateRemainingBadge();
 }
 
 function shuffle(array) {
@@ -114,7 +125,9 @@ class Game {
 
          <div class="image-wrapper">
             <div class="image-container">
-                <img src="" alt="Main Image" class="game-image">
+            <div class="image-container">
+                <img src="" alt="Main Image" class="game-image" style="opacity: 0; transition: opacity 0.3s ease;">
+            </div>
             </div>
             <div class="overlay-grid"></div>
          </div>
@@ -144,6 +157,10 @@ class Game {
         imageContainer: wrapper.querySelector(".image-container")
     };
 
+    // Bind Events
+    this.elements.spinBtn.onclick = () => this.chooseRandomNumber();
+    this.elements.editBtn.onclick = () => this.toggleTeamEdit();
+    
     // Bind Events
     this.elements.spinBtn.onclick = () => this.chooseRandomNumber();
     this.elements.editBtn.onclick = () => this.toggleTeamEdit();
@@ -203,6 +220,9 @@ class Game {
 
         this.initGrid();
         this.resetGameLogic();
+        
+        // Reveal Image Only After Grid Is Ready
+        this.elements.img.style.opacity = "1";
     };
   }
 
@@ -221,9 +241,17 @@ class Game {
       // this.questionsRemaining = this.totalQuestions; // No longer needed for 1-to-1 reveal
 
       this.updateChosenList();
+      updateRemainingBadge();
       
       this.elements.spinBtn.disabled = false;
       this.elements.spinBtn.textContent = "Show Random Number";
+  }
+
+  markCurrentAsUsed() {
+      if (this.imageName) { 
+          const id = this.imageName.replace(/\[|\]/g, "");
+          markImageAsUsed(id);
+      }
   }
 
   setRandomImage() {
@@ -232,9 +260,9 @@ class Game {
     const availableImages = AVAILABLE_IMAGES.map(String).filter((img) => !usedImages.includes(img));
 
     if (availableImages.length === 0) {
-        // Reset or warn
-       // sessionStorage.removeItem(USED_IMAGES_KEY); // Optional: auto-reset
-       // return this.setRandomImage(); 
+       alert("All images shown! Memory restarting.");
+       clearMemory();
+       return this.setRandomImage(); 
     }
 
     // Attempt to pick one, fallback to random existing if exhausted
@@ -246,6 +274,9 @@ class Game {
         randomImage = AVAILABLE_IMAGES[Math.floor(Math.random() * AVAILABLE_IMAGES.length)];
     }
 
+    // Hide image immediately while loading
+    this.elements.img.style.opacity = "0";
+    
     this.elements.img.src = `./src/media1/${randomImage}.jpg`;
     this.imageName = `[${randomImage}]`;
     this.elements.imageName.textContent = this.imageName;
@@ -386,6 +417,9 @@ class Game {
       this.chosenNumbers = Array.from({length: this.totalCells}, (_, i) => i + 1);
       this.remainingNumbers = [];
       this.updateChosenList();
+      
+      // Mark as used since we revealed it
+      this.markCurrentAsUsed();
   }
 }
 
@@ -435,7 +469,10 @@ backToMenuBtn.addEventListener("click", () => {
 });
 
 replaceImageBtn.addEventListener("click", () => {
-    games.forEach(g => g.init());
+    games.forEach(g => {
+        g.markCurrentAsUsed();
+        g.init();
+    });
 });
 
 revealAllBtn.addEventListener("click", () => {
