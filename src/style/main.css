@@ -1,0 +1,180 @@
+:root {
+    --gray-bg: #f3f4f6;
+    --gray-surface: #BFC9D1;
+    --gray-primary: #212529;
+    /* Dark charcoal */
+    --gray-secondary: #6c757d;
+    --gray-border: #dee2e6;
+    --gray-grid-cell: #adb5bd;
+    --gold-accent: #d4af37;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--gray-bg);
+    color: var(--gray-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Main Container */
+.main-container {
+    text-align: center;
+    max-width: 900px; /* Default for single */
+    width: 100%;
+    
+    /* Allow expanding for split screen */
+    transition: max-width 0.3s ease;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Wide container for 2-player mode */
+.main-container.wide-mode {
+    max-width: 95vw;
+}
+
+/* Image wrapper */
+.image-wrapper {
+    position: relative;
+    display: inline-block; /* Shrink to fit image exactly */
+    line-height: 0;       /* Kill text descender gaps */
+    
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    
+    margin: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--gray-surface);
+}
+
+.image-container {
+    display: contents; /* Remove from box tree so wrapper sees img directly */
+    /* width/height irrelevant with contents */
+}
+
+.game-image {
+    display: block;
+    
+    /* The core constraints */
+    max-height: 70vh;
+    max-width: 100%;
+    
+    /* Auto dimensions preserve aspect ratio naturally */
+    width: auto;
+    height: auto;
+    
+    object-fit: contain;
+}
+
+/* ... existing styles ... */
+
+/* Start Menu Overlay */
+.start-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(33, 37, 41, 0.95);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-content {
+    background: #fff;
+    min-width: 400px;
+    border-radius: 12px;
+}
+
+/* Game Area Layouts */
+.game-area-wrapper {
+    display: grid;
+    grid-template-columns: 1fr; /* Default single column */
+    gap: 2rem;
+    width: 100%;
+    margin-top: 1rem;
+    justify-items: center;
+}
+
+.game-instance {
+    width: 100%;
+    max-width: 800px; /* Limit single player size */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 2-Player Split Styling */
+.game-area-wrapper.split-screen {
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    align-items: start;
+}
+
+.game-area-wrapper.split-screen .game-instance {
+    max-width: 100%; /* Take full column width */
+}
+
+/* Dynamic Grid Cell Styling overrides */
+.overlay-grid {
+    position: absolute;
+    inset: 0; /* Cover the entire wrapper */
+    
+    display: grid; /* Will be overridden by JS with template columns/rows */
+    gap: 1px;
+}
+
+
+.grid-cell {
+    background: var(--gray-grid-cell);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: clamp(10px, 1.5vw, 24px);
+    color: #fff;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.grid-cell.revealed {
+    background: transparent;
+    color: transparent;
+    border-color: transparent;
+}
+
+.grid-cell.highlight {
+    animation: flash 0.6s infinite;
+    z-index: 10;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.5);
+}
+
+@keyframes flash {
+    0%, 100% {
+        background-color: var(--gray-grid-cell);
+        transform: scale(1);
+    }
+    50% {
+        background-color: var(--gold-accent);
+        transform: scale(1.05);
+    }
+}
+
+/* Utility to hide elements */
+.d-none {
+    display: none !important;
+}
+
+/* Teams Editor internal to game instance */
+.teams-wrapper {
+    margin-bottom: 10px;
+    width: 100%;
+}

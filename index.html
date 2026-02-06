@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Spin & Reveal</title>
+
+  <!-- Bootstrap (LOCAL) -->
+  <link rel="stylesheet" href="./src/style/bootstrap.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="./src/style/main.css">
+
+</head>
+
+<body>
+
+  <!-- Start Menu Overlay -->
+  <div id="startMenu" class="start-menu-overlay">
+    <div class="menu-content card p-5 shadow-lg">
+      <h1 class="mb-4 text-primary fw-bold">Spin & Reveal</h1>
+
+      <div class="mb-4">
+        <label class="form-label fw-bold">Select Mode</label>
+        <div class="btn-group w-100" role="group">
+          <input type="radio" class="btn-check" name="playerMode" id="modeSingle" value="1" checked>
+          <label class="btn btn-outline-primary" for="modeSingle">Single Player</label>
+
+          <input type="radio" class="btn-check" name="playerMode" id="modeDouble" value="2">
+          <label class="btn btn-outline-primary" for="modeDouble">2 Players</label>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="questionCount" class="form-label fw-bold">Number of Questions</label>
+        <input type="number" class="form-control" id="questionCount" min="1" max="100" value="10">
+        <div class="form-text">The picture will be revealed after this many correct answers.</div>
+      </div>
+
+      <button id="startGameBtn" class="btn btn-primary btn-lg w-100 mb-2">Start Game</button>
+      <button id="clearMemoryBtn" class="btn btn-outline-danger w-100 btn-sm">Clear Memory</button>
+    </div>
+  </div>
+
+  <div class="main-container d-none" id="gameContainer">
+    <!-- Navbar / Top Controls -->
+    <div class="d-flex gap-2 mt-2 mb-4 justify-content-center">
+      <button class="btn btn-secondary" id="backToMenuBtn">
+        &larr; Menu
+      </button>
+      <button class="btn btn-secondary" id="replaceImageBtn">
+        Replace Image
+      </button>
+      <button class="btn btn-warning" id="revealAllBtn">
+        Show Photo
+      </button>
+    </div>
+
+    <!-- Game Area (Dynamic Injection) -->
+    <div id="gameArea" class="game-area-wrapper">
+      <!-- Game instances will be injected here -->
+    </div>
+
+  </div>
+
+  <script src="./src/scripts/bootstrap.bundle.min.js"></script>
+  <script src="./src/scripts/main.js"></script>
+
+</body>
+
+</html>
