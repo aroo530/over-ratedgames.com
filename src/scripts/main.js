@@ -77,9 +77,9 @@ function calculateGridDimensions(totalItems, aspectRatio) {
  * Handles a single instance of the game board.
  */
 class Game {
-  constructor(containerId, totalQuestions) {
+  constructor(containerId, gridSize) {
     this.containerId = containerId;
-    this.totalQuestions = totalQuestions;
+    this.gridSize = gridSize;
     this.remainingNumbers = [];
     this.chosenNumbers = [];
     this.imageName = "";
@@ -185,8 +185,8 @@ class Game {
         // --- End Upscaling Logic ---
 
 
-        // Calculate Tripled Grid
-        const targetCells = this.totalQuestions * 3;
+        // Calculate Grid - Direct Mapping from User Input
+        const targetCells = this.gridSize;
         const dim = calculateGridDimensions(targetCells, aspect);
         
         this.rows = dim.rows;
@@ -208,8 +208,9 @@ class Game {
       this.remainingNumbers = Array.from({ length: this.totalCells }, (_, i) => i + 1);
       shuffle(this.remainingNumbers);
       
+      
       // Reset logic state
-      this.questionsRemaining = this.totalQuestions;
+      // this.questionsRemaining = this.totalQuestions; // No longer needed for 1-to-1 reveal
 
       this.updateChosenList();
       
@@ -286,15 +287,10 @@ class Game {
   }
 
   chooseRandomNumber() {
-      if (this.remainingNumbers.length === 0 || this.questionsRemaining <= 0) return;
+      if (this.remainingNumbers.length === 0) return;
 
-      // Calculate how many to reveal this turn
-      // We divide current hidden cells by remaining turns. 
-      // e.g. 30 cells, 10 questions -> 3 per turn. 
-      // If 29 cells left, 9 questions -> ceil(29/9) = 4 (or 3.something).
-      // This ensures we catch up if grid wasn't perfect multiple.
-      const cellsToRevealCount = Math.ceil(this.remainingNumbers.length / this.questionsRemaining);
-      this.questionsRemaining--;
+      // Reveal exactly one square each time
+      const cellsToRevealCount = 1;
 
       const chosenBatch = [];
       for (let i = 0; i < cellsToRevealCount; i++) {
@@ -382,7 +378,7 @@ if(clearMemoryBtn) {
 
 startGameBtn.addEventListener("click", () => {
     const mode = document.querySelector('input[name="playerMode"]:checked').value;
-    const qCount = parseInt(document.getElementById("questionCount").value) || 10;
+    const gridSize = parseInt(document.getElementById("gridSizeInput").value) || 30;
 
     startMenu.classList.add("d-none");
     gameContainer.classList.remove("d-none");
@@ -394,7 +390,7 @@ startGameBtn.addEventListener("click", () => {
         mainContainer.classList.remove("wide-mode");
     }
 
-    startNewGame(mode, qCount);
+    startNewGame(mode, gridSize);
 });
 
 backToMenuBtn.addEventListener("click", () => {
@@ -412,7 +408,7 @@ revealAllBtn.addEventListener("click", () => {
     games.forEach(g => g.revealAll());
 });
 
-function startNewGame(mode, questionCount) {
+function startNewGame(mode, gridSize) {
     gameArea.innerHTML = "";
     games = [];
 
@@ -421,7 +417,7 @@ function startNewGame(mode, questionCount) {
         const div = document.createElement("div");
         div.id = "game-1";
         gameArea.appendChild(div);
-        games.push(new Game("game-1", questionCount));
+        games.push(new Game("game-1", gridSize));
     } else {
         gameArea.classList.add("split-screen");
         
@@ -433,8 +429,8 @@ function startNewGame(mode, questionCount) {
         div2.id = "game-p2";
         gameArea.appendChild(div2);
 
-        games.push(new Game("game-p1", questionCount));
-        games.push(new Game("game-p2", questionCount));
+        games.push(new Game("game-p1", gridSize));
+        games.push(new Game("game-p2", gridSize));
         
         // Update default names
         games[0].elements.teamInput.value = "Team 1";
