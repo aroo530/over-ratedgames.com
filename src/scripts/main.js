@@ -2,7 +2,15 @@
 /**
  * Global Configuration
  */
-const TOTAL_IMAGES = 20; // Number of available images in src/media1/
+/**
+ * Global Configuration
+ */
+// Explicit list of available images in src/media1/ since some numbers are missing
+const AVAILABLE_IMAGES = [
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 
+  12, 13, 14, 15, 16, 17, 18, 19, 20, 
+  22, 24, 25, 26, 27, 28, 29, 30, 31, 32
+];
 const USED_IMAGES_KEY = "usedImages";
 
 function getUsedImages() {
@@ -220,9 +228,8 @@ class Game {
 
   setRandomImage() {
     const usedImages = getUsedImages();
-    const availableImages = Array.from({ length: TOTAL_IMAGES }, (_, i) =>
-      (i + 1).toString(),
-    ).filter((img) => !usedImages.includes(img));
+    // Filter from explicit list of AVAILABLE_IMAGES
+    const availableImages = AVAILABLE_IMAGES.map(String).filter((img) => !usedImages.includes(img));
 
     if (availableImages.length === 0) {
         // Reset or warn
@@ -235,7 +242,8 @@ class Game {
     if (availableImages.length > 0) {
         randomImage = availableImages[Math.floor(Math.random() * availableImages.length)];
     } else {
-        randomImage = Math.floor(Math.random() * TOTAL_IMAGES) + 1;
+        // Fallback: Pick random from valid list
+        randomImage = AVAILABLE_IMAGES[Math.floor(Math.random() * AVAILABLE_IMAGES.length)];
     }
 
     this.elements.img.src = `./src/media1/${randomImage}.jpg`;
@@ -286,6 +294,25 @@ class Game {
       this.elements.chosenList.textContent = this.chosenNumbers.join(", ");
   }
 
+  getPerimeterIndices() {
+      const indices = [];
+      if (this.rows <= 0 || this.cols <= 0) return [];
+
+      // Top row
+      for (let c = 0; c < this.cols; c++) indices.push(c);
+      // Right col
+      for (let r = 1; r < this.rows - 1; r++) indices.push(r * this.cols + (this.cols - 1));
+      // Bottom row
+      if (this.rows > 1) {
+          for (let c = this.cols - 1; c >= 0; c--) indices.push((this.rows - 1) * this.cols + c);
+      }
+      // Left col
+      if (this.cols > 1) {
+          for (let r = this.rows - 2; r > 0; r--) indices.push(r * this.cols);
+      }
+      return indices;
+  }
+
   chooseRandomNumber() {
       if (this.remainingNumbers.length === 0) return;
 
@@ -309,23 +336,30 @@ class Game {
       const originalText = btn.textContent;
       btn.textContent = "Choosing...";
 
-      // Flash Effect (visual only, picks random unrevealed cells to flash)
-      const intervalTime = 150;
+      // Perimeter Animation
+      const gridChildren = this.elements.grid.children;
+      const perimeter = this.getPerimeterIndices();
+      let tick = 0;
+      const intervalTime = 50; 
       const duration = 2000;
-      const cells = Array.from(this.elements.grid.querySelectorAll(".grid-cell:not(.revealed)"));
       
       const intervalId = setInterval(() => {
-          cells.forEach(c => c.classList.remove("highlight"));
-          if(cells.length > 0) {
-            // Flash a few cells for effect
-            const rnd = cells[Math.floor(Math.random() * cells.length)];
-            rnd.classList.add("highlight");
+          // Remove from previous
+          if (tick > 0) {
+             const prevIdx = perimeter[(tick - 1) % perimeter.length];
+             if (gridChildren[prevIdx]) gridChildren[prevIdx].classList.remove("highlight");
           }
+           
+          const currIdx = perimeter[tick % perimeter.length];
+          if (gridChildren[currIdx]) gridChildren[currIdx].classList.add("highlight");
+          
+          tick++;
       }, intervalTime);
 
       setTimeout(() => {
           clearInterval(intervalId);
-          cells.forEach(c => c.classList.remove("highlight"));
+          // Clean all highlights
+          Array.from(gridChildren).forEach(c => c.classList.remove("highlight"));
           
           btn.textContent = originalText;
           btn.disabled = false;
