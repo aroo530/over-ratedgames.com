@@ -161,10 +161,6 @@ class Game {
     this.elements.spinBtn.onclick = () => this.chooseRandomNumber();
     this.elements.editBtn.onclick = () => this.toggleTeamEdit();
     
-    // Bind Events
-    this.elements.spinBtn.onclick = () => this.chooseRandomNumber();
-    this.elements.editBtn.onclick = () => this.toggleTeamEdit();
-    
     // Image Load Event to trigger Grid Calc
     this.elements.img.onload = () => {
         const naturalWidth = this.elements.img.naturalWidth;
